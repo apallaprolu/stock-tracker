@@ -1,20 +1,12 @@
 import fire
-from urllib.request import urlopen, Request
+import requests
 
 def download(url):
     file_name = url.split('/')[-1]
-    headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) ' 
-                      'AppleWebKit/537.11 (KHTML, like Gecko) '
-                      'Chrome/23.0.1271.64 Safari/537.11',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-        'Accept-Encoding': 'none',
-        'Accept-Language': 'en-US,en;q=0.8',
-        'Connection': 'keep-alive'}
-    uR = Request(url, headers=headers)
-    u = urlopen(uR).read()
+    headers = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36'}
+    uR = requests.get(url, timeout=100, headers=headers)
     f = open(file_name, 'wb')
-    f.write(u)
+    f.write(uR.content)
     f.close()
 
 def getStocks(dr, mr, yr):
@@ -31,11 +23,13 @@ def getStocks(dr, mr, yr):
                 try:
                     if d < 10:
                         print("Processing request: https://www.nseindia.com/content/historical/EQUITIES/"+str(y)+"/"+dmonth[m]+"/cm0"+str(d)+dmonth[m]+str(y)+"bhav.csv.zip")
-                        download_pb("https://www.nseindia.com/content/historical/EQUITIES/"+str(y)+"/"+dmonth[m]+"/cm0"+str(d)+dmonth[m]+str(y)+"bhav.csv.zip")
+                        download("https://www.nseindia.com/content/historical/EQUITIES/"+str(y)+"/"+dmonth[m]+"/cm0"+str(d)+dmonth[m]+str(y)+"bhav.csv.zip")
                     else:
                         print("Processing request: https://www.nseindia.com/content/historical/EQUITIES/"+str(y)+"/"+dmonth[m]+"/cm"+str(d)+dmonth[m]+str(y)+"bhav.csv.zip")
-                        download_pb("https://www.nseindia.com/content/historical/EQUITIES/"+str(y)+"/"+dmonth[m]+"/cm"+str(d)+dmonth[m]+str(y)+"bhav.csv.zip")
+                        download("https://www.nseindia.com/content/historical/EQUITIES/"+str(y)+"/"+dmonth[m]+"/cm"+str(d)+dmonth[m]+str(y)+"bhav.csv.zip")
                 except:
                     print("No data found for: ", y, m, d)
                     continue
-    
+
+if __name__ == '__main__':
+    fire.Fire(getStocks)
