@@ -1,11 +1,14 @@
 import fire
 import requests
+import os
+import zipfile
+
 
 def download(url):
     file_name = url.split('/')[-1]
     headers = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36'}
     uR = requests.get(url, timeout=100, headers=headers)
-    f = open(file_name, 'wb')
+    f = open("stockData/" + str(file_name), 'wb')
     f.write(uR.content)
     f.close()
 
@@ -19,17 +22,26 @@ def getStocks(dr, mr, yr):
     for y in range(start_year, end_year + 1):
         for m in range(start_month, end_month + 1):
             for d in range(start_date, end_date + 1):
-                print("Fetching info for: ", y, m, d)
+                print("getStocks is fetching info for: ", y, m, d)
                 try:
                     if d < 10:
-                        print("Processing request: https://www.nseindia.com/content/historical/EQUITIES/"+str(y)+"/"+dmonth[m]+"/cm0"+str(d)+dmonth[m]+str(y)+"bhav.csv.zip")
+                        print("getStocks is processing request: https://www.nseindia.com/content/historical/EQUITIES/"+str(y)+"/"+dmonth[m]+"/cm0"+str(d)+dmonth[m]+str(y)+"bhav.csv.zip")
                         download("https://www.nseindia.com/content/historical/EQUITIES/"+str(y)+"/"+dmonth[m]+"/cm0"+str(d)+dmonth[m]+str(y)+"bhav.csv.zip")
+                        if(not zipfile.is_zipfile("stockData/" + str("cm0"+str(d)+dmonth[m]+str(y)+"bhav.csv.zip"))):
+                            os.remove("stockData/" + str("cm0"+str(d)+dmonth[m]+str(y)+"bhav.csv.zip"))
                     else:
-                        print("Processing request: https://www.nseindia.com/content/historical/EQUITIES/"+str(y)+"/"+dmonth[m]+"/cm"+str(d)+dmonth[m]+str(y)+"bhav.csv.zip")
+                        print("getStocks is processing request: https://www.nseindia.com/content/historical/EQUITIES/"+str(y)+"/"+dmonth[m]+"/cm"+str(d)+dmonth[m]+str(y)+"bhav.csv.zip")
                         download("https://www.nseindia.com/content/historical/EQUITIES/"+str(y)+"/"+dmonth[m]+"/cm"+str(d)+dmonth[m]+str(y)+"bhav.csv.zip")
+                        if(not zipfile.is_zipfile("stockData/" + str("/cm"+str(d)+dmonth[m]+str(y)+"bhav.csv.zip"))):
+                            os.remove("stockData/" + str("/cm"+str(d)+dmonth[m]+str(y)+"bhav.csv.zip"))
                 except:
-                    print("No data found for: ", y, m, d)
+                    print("getStocks says no data found for: ", y, m, d)
                     continue
 
 if __name__ == '__main__':
+    try:
+        os.mkdir("stockData")
+    except:
+        os.rmdir("stockData")
+        os.mkdir("stockData")
     fire.Fire(getStocks)
