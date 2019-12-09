@@ -25,6 +25,7 @@ def unifyCSV(columns_to_extract):
         stockDF = stockDF.append(tmp[columns_to_extract])
         print("processData is deleting: " + file)
         os.remove(file)
+    os.rmdir("stockData")
     return stockDF
 
 def getQuoteTable(symbols, stockDF, params=[]):
@@ -37,9 +38,11 @@ def getQuoteTable(symbols, stockDF, params=[]):
     stockAgg = []
     for x in list(map(lambda y: y.strftime('%d-%b-%Y').upper(), sorted(list(map(lambda x: datetime.strptime(x, '%d-%b-%Y'), list(set(stockDF['TIMESTAMP']))))))):
         row = []
+        print("getQuoteTable is processing timestamp: " + str(x))
         row.append(x)
         for j in [y for y in quoteTable.columns if y != 'DATE']:
-            residue = stockDF[(stockDF['SYMBOL'] == j) & (stockDF['TIMESTAMP'] == x)]['CLOSE'].tolist()
+            residue = stockDF[(stockDF['SYMBOL'] == j) & (stockDF['SERIES'] == 'EQ') & (stockDF['TIMESTAMP'] == x)]['CLOSE'].tolist()
+            print("getQuoteTable found " + str(len(residue)) + " entries for symbol: " + str(j) + " with timestamp: " + str(x))
             if len(residue) == 0:
                 residue = np.NaN
             else:
@@ -47,9 +50,13 @@ def getQuoteTable(symbols, stockDF, params=[]):
             row.append(residue)
         stockAgg.append(row)
     quoteTable = pd.DataFrame(stockAgg, columns = table_columns)
+    quoteTable.fillna(quoteTable.mean(), inplace=True)
+    print("getQuoteTable is saving quoteTable.csv")
+    quoteTable.to_csv("quoteTable.csv", index=False, na_rep=np.NaN)
     return quoteTable
 
-
-
-
-
+# Usage
+# extractData()
+# stockDF = unifyCSV(["SYMBOL", "SERIES", "TIMESTAMP", "OPEN", "HIGH", "LOW", "CLOSE"])
+# qTable = getQuoteTable(["EVEREADY","EICHERMOT","SUNTV","SUNPHARMA","ASHIANA","EMAMILTD","CLNINDIA","CADILAHC","THYROCARE","BLUEDART","HINDZINC"], 
+#                         stockDF)
