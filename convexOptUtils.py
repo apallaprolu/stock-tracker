@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 from cvxopt import matrix, solvers
-
+import matplotlib.pyplot as plt
 
 def getReturns(quoteTable):
     rTable = []
@@ -73,8 +73,22 @@ def getPortfolio(mVector, covMatrix, mode=0):
 
 
 
+def plotMarkowitz(N_iter, mean, cov):
+    # Monte-carlo generation of the Markowitz-Pareto boundary.
+    stoch = np.random.rand(N_iter, len(mean))
+    stoch = stoch/stoch.sum(axis=1)[:,None].tolist()
 
+    exp_return = []
+    exp_volatility = []
+    wvec = []
 
+    for i in stoch:
+        exp_return.append(np.dot(i, mean))
+        exp_volatility.append(np.sqrt(np.dot(i, np.dot(cov, np.transpose(i)))))
+        wvec.append(i)
 
+    plt.scatter(exp_volatility, exp_return)
+    plt.savefig("MarkowitzPareto.png")
+    return 0
 
 
