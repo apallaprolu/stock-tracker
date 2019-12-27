@@ -75,6 +75,7 @@ def getPortfolio(mVector, covMatrix, mode=0):
 
 def plotMarkowitz(N_iter, mean, cov):
     # Monte-carlo generation of the Markowitz-Pareto boundary.
+    # Will return the statistical risk averse and maximum return portfolio.
     stoch = np.random.rand(N_iter, len(mean))
     stoch = stoch/stoch.sum(axis=1)[:,None].tolist()
 
@@ -89,6 +90,10 @@ def plotMarkowitz(N_iter, mean, cov):
 
     plt.scatter(exp_volatility, exp_return)
     plt.savefig("MarkowitzPareto.png")
-    return 0
+
+    riskAversePortfolio = stoch[exp_volatility.index(min(exp_volatility))]
+    maxReturnPortfolio = stoch[exp_return.index(max(exp_return))]
+
+    return riskAversePortfolio, maxReturnPortfolio 
 
 
